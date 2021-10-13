@@ -285,7 +285,7 @@ def betterEvaluationFunction(currentGameState):
     currentCapsules = currentGameState.getCapsules()
     currentPos = currentGameState.getPacmanPosition()    
     
-    utility = currentScore - (4 * len(currentFoods)) - (20 * len(currentCapsules))
+    utility = currentScore - (4 * len(currentFoods)) - (15 * len(currentCapsules))
     minFoodDist = float('inf')
     minCapsuleDist = float('inf')
 
@@ -298,7 +298,7 @@ def betterEvaluationFunction(currentGameState):
         minCapsuleDist = min(minCapsuleDist, currentDist)
 
     utility -= 1.5 * minFoodDist if minFoodDist < float('inf') else 0
-    utility -= 4 * minCapsuleDist if minCapsuleDist < float('inf') else 0
+    utility -= 6 * minCapsuleDist if minCapsuleDist < float('inf') else 0
 
     minGhostDist = float('inf')
     minScaredGhostDist = float('inf')
@@ -312,7 +312,7 @@ def betterEvaluationFunction(currentGameState):
         if not ghost.scaredTimer and minGhostDist > currentDist:
             minGhostDist = currentDist
 
-    utility -= 2 * (1/minGhostDist) if minGhostDist < float('inf') else 0
+    utility -= 2/minGhostDist if minGhostDist < float('inf') else 0
     utility -= 2 * minScaredGhostDist if minScaredGhostDist < float('inf') else 0
 
     return utility
