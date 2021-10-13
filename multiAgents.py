@@ -270,29 +270,50 @@ def betterEvaluationFunction(currentGameState):
     - distance away from ghosts
     - distance to scared ghosts
     - distance to closest food
+    - distance to capsule
+    - amount of capsules left
     - amount of food left
     """
-    # if currentGameState.isLose():
-    #     return - float('inf')
-    # elif currentGameState.isWin():
-    #     return float('inf')
-
+    if currentGameState.isLose():
+        return -float('inf')
+    if currentGameState.isWin():
+        return float('inf')
+    
     currentScore = scoreEvaluationFunction(currentGameState)
     ghostStates = currentGameState.getGhostStates()
     currentFoods = currentGameState.getFood().asList()
+    currentCapsules = currentGameState.getCapsules()
     currentPos = currentGameState.getPacmanPosition()    
     
-    utility = 0
+    utility = currentScore - (4 * len(currentFoods)) - (20 * len(currentCapsules))
+    minFoodDist = float('inf')
+    minCapsuleDist = float('inf')
 
-    utility += currentScore
+    for food in currentFoods:
+        currentDist = manhattanDistance(currentPos, food)
+        minFoodDist = min(minFoodDist, currentDist)
 
-    utility -= (5 * len(currentFoods))
+    for capsule in currentCapsules:
+        currentDist = manhattanDistance(currentPos, capsule)
+        minCapsuleDist = min(minCapsuleDist, currentDist)
+
+    utility -= 1.5 * minFoodDist if minFoodDist < float('inf') else 0
+    utility -= 4 * minCapsuleDist if minCapsuleDist < float('inf') else 0
+
+    minGhostDist = float('inf')
+    minScaredGhostDist = float('inf')
 
     for ghost in ghostStates:
-        ghostPos = ghost.getPosition()
-        distance = manhattanDistance(currentPos, ghostPos)
+        currentDist = manhattanDistance(currentPos, ghost.getPosition())
 
-        utility += (3 * distance)
+        if ghost.scaredTimer and minScaredGhostDist > currentDist:
+            minScaredGhostDist = currentDist
+
+        if not ghost.scaredTimer and minGhostDist > currentDist:
+            minGhostDist = currentDist
+
+    utility -= 2 * (1/minGhostDist) if minGhostDist < float('inf') else 0
+    utility -= 2 * minScaredGhostDist if minScaredGhostDist < float('inf') else 0
 
     return utility
 
